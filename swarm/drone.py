@@ -4,14 +4,14 @@ from config.swarm_config import DT
 
 class Drone:
     def __init__(self, name, start_pos):
-        self.name = name
-        self.start_pos = np.array(start_pos)
-        self.client = airsim.MultirotorClient()
-        self.client.confirmConnection()
-        self.client.enableApiControl(True, self.name)
-        self.client.armDisarm(True, self.name)
+        self.name = name    # 无人机名称
+        self.start_pos = np.array(start_pos)    # 起飞位置
+        self.client = airsim.MultirotorClient()  # 连接 AirSim
+        self.client.confirmConnection() # 确认连接
+        self.client.enableApiControl(True, self.name)   # 启用 API 控制
+        self.client.armDisarm(True, self.name)  # 解锁
 
-        self.prev_velocity = np.zeros(3)
+        self.prev_velocity = np.zeros(3)    # 上一时刻速度（用于低通滤波）
 
     # --------------------
     # 起飞（只控制一次高度）
