@@ -1,72 +1,115 @@
 import numpy as np
+import math
 from config.swarm_config import *
 
-def compute_circle_velocity(pos):
-    center = np.array([0.0, 0.0, pos[2]])
-    vec = pos - center
-    vec[2] = 0.0
+# =========================
+# 工具函数
+# =========================
 
-    r = np.linalg.norm(vec)
-    if r < 1e-3:
-        return np.array([0.0, CIRCLE_SPEED, 0.0])
+def limit_norm(v, max_norm):
+    n = np.linalg.norm(v)
+    if n < 1e-6:
+        return v
+    if n > max_norm:
+        return v / n * max_norm
+    return v
 
-    r_hat = vec / r
 
-    # 切向单位向量（3D）
-    t_hat = np.array([-r_hat[1], r_hat[0], 0.0])
-
-    v_tangent = t_hat * CIRCLE_SPEED
-    v_radial = (CIRCLE_RADIUS - r) * r_hat * 0.8
-
-    return v_tangent + v_radial
-
+# =========================
+# Leader 控制
+# =========================
 
 def leader_velocity(leader):
     pos = leader.get_position()
-    return compute_circle_velocity(pos)
+    x, y = pos[0], pos[1]
+
+    r = math.hypot(x, y)
+
+    # =========================
+    # 1. 径向控制（拉到圆上）
+    # =========================
+    r_error = TARGET_RADIUS - r
+
+    if r < 1e-3:
+        radial = np.array([1.0, 0.0])
+    else:
+        radial = np.array([x / r, y / r])
+
+    v_radial = KP_RADIUS * r_error * radial
+
+    # =========================
+    # 2. 切向控制（绕圈）
+    # =========================
+    if r < 1e-3:
+        tangent = np.array([0.0, 0.0])
+    else:
+        tangent = np.array([-y / r, x / r])
+
+    v_tangent = CIRCLE_SPEED * tangent
+
+    v = v_radial + v_tangent
+
+    # =========================
+    # 3. 限速
+    # =========================
+    v_xy = limit_norm(v[:2], MAX_LEADER_SPEED)
+
+    return np.array([v_xy[0], v_xy[1], 0.0], dtype=float)
 
 
-def follower_velocity(leader, follower, offset_body):
-    # 领机圆周速度
-    v_leader = compute_circle_velocity(leader.get_position())
+# =========================
+# Follower 控制（修正版）
+# =========================
 
-    speed_xy = np.linalg.norm(v_leader[:2])
-    if speed_xy < 1e-3:
-        return np.zeros(3)
+def follower_velocity(leader, follower, lateral_offset):
+    """
+    不依赖 leader.velocity
+    不改 main
+    不改 drone
+    """
 
-    # === 关键修复：heading/right 全部用 3 维 ===
-    heading = np.array([
-        v_leader[0] / speed_xy,
-        v_leader[1] / speed_xy,
-        0.0
+    p_l = np.array(leader.get_position())
+    p_f = np.array(follower.get_position())
+
+    # =========================
+    # 由几何关系确定 leader 朝向
+    # =========================
+    # leader 绕圆：切向方向 = (-y, x)
+    x, y = p_l[0], p_l[1]
+    r = math.hypot(x, y)
+
+    if r < 1e-3:
+        heading = np.array([1.0, 0.0])
+    else:
+        heading = np.array([-y / r, x / r])
+
+    normal = np.array([-heading[1], heading[0]])
+
+    # =========================
+    # 期望编队位置
+    # =========================
+
+    target_pos = np.array([
+        p_l[0] + lateral_offset * normal[0],
+        p_l[1] + lateral_offset * normal[1],
+        -TARGET_ALTITUDE
     ])
 
-    right = np.array([
-        -heading[1],
-         heading[0],
-         0.0
-    ])
+    error = target_pos - p_f
 
-    leader_pos = leader.get_position()
-    follower_pos = follower.get_position()
+    # =========================
+    # 水平控制（不超头机）
+    # =========================
 
-    # 期望位置（世界坐标系）
-    desired_pos = (
-        leader_pos
-        - heading * FORMATION_DISTANCE
-        + right * offset_body
-    )
+    v_xy = KP_POSITION * error[:2]
+    v_xy = limit_norm(v_xy, CIRCLE_SPEED)
 
-    error = desired_pos - follower_pos
+    # =========================
+    # 高度独立回归
+    # =========================
 
-    v_form = K_FORMATION * error
-    v = v_leader + v_form
+    z_err = (-TARGET_ALTITUDE) - p_f[2]
+    v_z = KP_ALTITUDE * z_err
+    v_z = np.clip(v_z, -MAX_Z_SPEED, MAX_Z_SPEED)
 
-    # 不由队形控制高度
-    v[2] = 0.0
-
-    speed = np.linalg.norm(v)
-    if speed > MAX_SPEED:
-        v = v / speed * MAX_SPEED
-
-    return v
+    return np.array([v_xy[0], v_xy[1], v_z], dtype=float)
