@@ -27,7 +27,7 @@ def main():
         left.move(follower_velocity(leader, left, +FORMATION_WIDTH))
         right.move(follower_velocity(leader, right, -FORMATION_WIDTH))
 
-        # 路程积分（关键）
+        # 路程积分
         arc_length += np.linalg.norm(v_leader) * DT
 
         time.sleep(DT)
