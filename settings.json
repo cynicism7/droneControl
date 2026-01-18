@@ -1,0 +1,310 @@
+{
+  "SeeDocsAt": "https://github.com/Microsoft/AirSim/blob/main/docs/settings.md",
+  "SettingsVersion": 1.2,
+  "SimMode": "Multirotor",
+  "Vehicles": {
+    "Drone1": {
+      "VehicleType": "SimpleFlight",
+      "X": 0,
+      "Y": 0,
+      "Z": 0,
+      "Cameras": {
+        "front_rgb": {
+          "X": 0.5,
+          "Y": 0,
+          "Z": 0,
+          "Pitch": -45,
+          "Roll": 0,
+          "Yaw": 0,
+          "CaptureSettings": [
+            {
+              "ImageType": 0,
+              "Width": 1280,
+              "Height": 720,
+              "FOV_Degrees": 75
+            }
+          ]
+        },
+        "front_depth": {
+          "X": 0.5,
+          "Y": 0,
+          "Z": 0,
+          "Pitch": 0,
+          "Roll": 0,
+          "Yaw": 0,
+          "CaptureSettings": [
+            {
+              "ImageType": 3,
+              "Width": 1280,
+              "Height": 720
+            }
+          ]
+        }
+      },
+      "Sensors": {
+        "FrontRadar": {
+          "SensorType": 6,
+          "Enabled": true,
+          "NumberOfChannels": 1,
+          "PointsPerSecond": 5000,
+          "RotationsPerSecond": 10,
+          "VerticalFOVUpper": 15,
+          "VerticalFOVLower": -15,
+          "HorizontalFOVStart": -30,
+          "HorizontalFOVEnd": 30,
+          "Range": 20,
+          "X": 0.5,
+          "Y": 0,
+          "Z": 0,
+          "Pitch": 0,
+          "Roll": 0,
+          "Yaw": 0
+        },
+        "LeftRadar": {
+          "SensorType": 6,
+          "Enabled": true,
+          "NumberOfChannels": 1,
+          "PointsPerSecond": 5000,
+          "RotationsPerSecond": 10,
+          "VerticalFOVUpper": 15,
+          "VerticalFOVLower": -15,
+          "HorizontalFOVStart": -30,
+          "HorizontalFOVEnd": 30,
+          "Range": 20,
+          "X": 0,
+          "Y": 0.5,
+          "Z": 0,
+          "Pitch": 0,
+          "Roll": 0,
+          "Yaw": 90
+        },
+        "RightRadar": {
+          "SensorType": 6,
+          "Enabled": true,
+          "NumberOfChannels": 1,
+          "PointsPerSecond": 5000,
+          "RotationsPerSecond": 10,
+          "VerticalFOVUpper": 15,
+          "VerticalFOVLower": -15,
+          "HorizontalFOVStart": -30,
+          "HorizontalFOVEnd": 30,
+          "Range": 20,
+          "X": 0,
+          "Y": -0.5,
+          "Z": 0,
+          "Pitch": 0,
+          "Roll": 0,
+          "Yaw": -90
+        }
+      }
+    },
+    "Drone2": {
+      "VehicleType": "SimpleFlight",
+      "X": 5,
+      "Y": 0,
+      "Z": 0,
+      "Cameras": {
+        "front_rgb": {
+          "X": 0.5,
+          "Y": 0,
+          "Z": 0,
+          "Pitch": -45,
+          "Roll": 0,
+          "Yaw": 0,
+          "CaptureSettings": [
+            {
+              "ImageType": 0,
+              "Width": 1280,
+              "Height": 720,
+              "FOV_Degrees": 75
+            }
+          ]
+        },
+        "front_depth": {
+          "X": 0.5,
+          "Y": 0,
+          "Z": 0,
+          "Pitch": 0,
+          "Roll": 0,
+          "Yaw": 0,
+          "CaptureSettings": [
+            {
+              "ImageType": 3,
+              "Width": 1280,
+              "Height": 720
+            }
+          ]
+        }
+      },
+      "Sensors": {
+        "FrontRadar": {
+          "SensorType": 6,
+          "Enabled": true,
+          "NumberOfChannels": 1,
+          "PointsPerSecond": 5000,
+          "RotationsPerSecond": 10,
+          "VerticalFOVUpper": 15,
+          "VerticalFOVLower": -15,
+          "HorizontalFOVStart": -30,
+          "HorizontalFOVEnd": 30,
+          "Range": 20,
+          "X": 0.5,
+          "Y": 0,
+          "Z": 0,
+          "Pitch": 0,
+          "Roll": 0,
+          "Yaw": 0
+        },
+        "LeftRadar": {
+          "SensorType": 6,
+          "Enabled": true,
+          "NumberOfChannels": 1,
+          "PointsPerSecond": 5000,
+          "RotationsPerSecond": 10,
+          "VerticalFOVUpper": 15,
+          "VerticalFOVLower": -15,
+          "HorizontalFOVStart": -30,
+          "HorizontalFOVEnd": 30,
+          "Range": 20,
+          "X": 0,
+          "Y": 0.5,
+          "Z": 0,
+          "Pitch": 0,
+          "Roll": 0,
+          "Yaw": 90
+        },
+        "RightRadar": {
+          "SensorType": 6,
+          "Enabled": true,
+          "NumberOfChannels": 1,
+          "PointsPerSecond": 5000,
+          "RotationsPerSecond": 10,
+          "VerticalFOVUpper": 15,
+          "VerticalFOVLower": -15,
+          "HorizontalFOVStart": -30,
+          "HorizontalFOVEnd": 30,
+          "Range": 20,
+          "X": 0,
+          "Y": -0.5,
+          "Z": 0,
+          "Pitch": 0,
+          "Roll": 0,
+          "Yaw": -90
+        }
+      }
+    },
+    "Drone3": {
+      "VehicleType": "SimpleFlight",
+      "X": -5,
+      "Y": 0,
+      "Z": 0,
+      "Cameras": {
+        "front_rgb": {
+          "X": 0.5,
+          "Y": 0,
+          "Z": 0,
+          "Pitch": -45,
+          "Roll": 0,
+          "Yaw": 0,
+          "CaptureSettings": [
+            {
+              "ImageType": 0,
+              "Width": 1280,
+              "Height": 720,
+              "FOV_Degrees": 75
+            }
+          ]
+        },
+        "front_depth": {
+          "X": 0.5,
+          "Y": 0,
+          "Z": 0,
+          "Pitch": 0,
+          "Roll": 0,
+          "Yaw": 0,
+          "CaptureSettings": [
+            {
+              "ImageType": 3,
+              "Width": 1280,
+              "Height": 720
+            }
+          ]
+        }
+      },
+      "Sensors": {
+        "FrontRadar": {
+          "SensorType": 6,
+          "Enabled": true,
+          "NumberOfChannels": 1,
+          "PointsPerSecond": 5000,
+          "RotationsPerSecond": 10,
+          "VerticalFOVUpper": 15,
+          "VerticalFOVLower": -15,
+          "HorizontalFOVStart": -30,
+          "HorizontalFOVEnd": 30,
+          "Range": 20,
+          "X": 0.5,
+          "Y": 0,
+          "Z": 0,
+          "Pitch": 0,
+          "Roll": 0,
+          "Yaw": 0
+        },
+        "LeftRadar": {
+          "SensorType": 6,
+          "Enabled": true,
+          "NumberOfChannels": 1,
+          "PointsPerSecond": 5000,
+          "RotationsPerSecond": 10,
+          "VerticalFOVUpper": 15,
+          "VerticalFOVLower": -15,
+          "HorizontalFOVStart": -30,
+          "HorizontalFOVEnd": 30,
+          "Range": 20,
+          "X": 0,
+          "Y": 0.5,
+          "Z": 0,
+          "Pitch": 0,
+          "Roll": 0,
+          "Yaw": 90
+        },
+        "RightRadar": {
+          "SensorType": 6,
+          "Enabled": true,
+          "NumberOfChannels": 1,
+          "PointsPerSecond": 5000,
+          "RotationsPerSecond": 10,
+          "VerticalFOVUpper": 15,
+          "VerticalFOVLower": -15,
+          "HorizontalFOVStart": -30,
+          "HorizontalFOVEnd": 30,
+          "Range": 20,
+          "X": 0,
+          "Y": -0.5,
+          "Z": 0,
+          "Pitch": 0,
+          "Roll": 0,
+          "Yaw": -90
+        }
+      }
+    }
+  },
+ "Cameras": {
+    "MonitorCam": {
+      "CaptureSettings": [
+        {
+          "ImageType": 0,
+          "Width": 1280,
+          "Height": 720,
+          "FOV_Degrees": 90
+        }
+      ],
+      "X": 0,
+      "Y": 0,
+      "Z": -50,
+      "Pitch": -90,
+      "Roll": 0,
+      "Yaw": 0
+    }
+  }
+}
