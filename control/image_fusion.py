@@ -378,23 +378,10 @@ class ImageFusion:
             return None
         
         if len(images) == 1:
-            if 'image' in images[0] and images[0]['image'] is not None:
-                return images[0]['image']
-            else:
-                return None
+            return images[0]['image']
         
-        # 使用第一张有效图像作为参考
-        reference_img = None
-        for img_data in images:
-            if 'image' in img_data and img_data['image'] is not None:
-                if hasattr(img_data['image'], 'shape') or isinstance(img_data['image'], np.ndarray):
-                    reference_img = img_data['image']
-                    break
-        
-        if reference_img is None:
-            print("[错误] 没有找到有效的参考图像")
-            return None
-        
+        # 使用第一张图像作为参考
+        reference_img = images[0]['image']
         aligned_images = [reference_img]
         
         print(f"[图像融合] 开始融合 {len(images)} 张图像...")
@@ -405,25 +392,7 @@ class ImageFusion:
         
         # 对齐所有图像到参考图像
         for i in range(1, len(images)):
-            # 检查图像数据是否存在
-            if 'image' not in images[i]:
-                print(f"\n[图像融合] 跳过图像 {i+1}/{len(images)} (缺少'image'键)")
-                failed_alignments += 1
-                continue
-            
             img = images[i]['image']
-            
-            # 检查图像是否有效
-            if img is None:
-                print(f"\n[图像融合] 跳过图像 {i+1}/{len(images)} (图像为None)")
-                failed_alignments += 1
-                continue
-            
-            if not hasattr(img, 'shape') or len(img.shape) < 2:
-                print(f"\n[图像融合] 跳过图像 {i+1}/{len(images)} (无效的图像格式)")
-                failed_alignments += 1
-                continue
-            
             print(f"\n[图像融合] 处理图像 {i+1}/{len(images)} (尺寸: {img.shape[1]}x{img.shape[0]})...")
             
             H, quality = self.find_homography(reference_img, img)

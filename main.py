@@ -134,34 +134,22 @@ def main():
     # 等待所有无人机收到同步信号（UDP通信有延迟）
     time.sleep(0.5)
     
-    # 确保所有无人机使用相同的同步时间戳
-    # 如果是跟随者，从UDP获取同步时间戳；否则使用头机的时间戳
-    actual_sync_timestamp = sync_timestamp
-    for drone in follower_drones:
-        if udp_comms and drone.name in udp_comms:
-            udp_sync = udp_comms[drone.name].get_sync_timestamp()
-            if udp_sync:
-                # 使用UDP接收到的同步时间戳
-                actual_sync_timestamp = udp_sync
-                print(f"[同步] {drone.name} 使用UDP同步时间戳: {actual_sync_timestamp}")
-                break
-    
     # 5. 执行矩形路径扫描并采集图像（同时开始）
     image_capture_interval = 2.0  # 每2秒采集一次图像
     pointcloud_capture_interval = 3.0  # 每3秒采集一次点云
-    # 使用同步时间戳作为基准，而不是各自的当前时间
-    last_capture_sync_time = {d.name: 0.0 for d in drones}  # 相对于同步时间的采集时间
-    last_pc_capture_sync_time = {d.name: 0.0 for d in drones}
+    last_capture_time = {d.name: 0.0 for d in drones}
+    last_pc_capture_time = {d.name: 0.0 for d in drones}
     max_iterations = 2000  # 最大迭代次数，防止无限循环
     iteration = 0
     
     all_paths_completed = False
+    start_time = time.time()  # 记录开始时间，用于同步
     
     while not all_paths_completed and iteration < max_iterations:
         iteration += 1
         current_time = time.time()
-        # 使用相对于同步时间的时间戳（所有无人机使用相同的基准）
-        sync_relative_time = current_time - actual_sync_timestamp
+        # 使用相对于同步时间的时间戳
+        sync_relative_time = current_time - sync_timestamp
         all_paths_completed = True
         
         for drone in drones:
@@ -179,12 +167,12 @@ def main():
                 # 控制无人机移动
                 drone.move(target_velocity, dt=DT)
                 
-                # 定期采集图像（使用同步时间，确保所有无人机同时采集）
-                if sync_relative_time - last_capture_sync_time[drone.name] >= image_capture_interval:
+                # 定期采集图像（同步采集）
+                if current_time - last_capture_time[drone.name] >= image_capture_interval:
                     img_info = drone.capture_image()
                     if img_info:
                         print(f"[采集] {drone.name} 在位置 {current_pos[:2]} 采集图像 (同步时间: {sync_relative_time:.2f}s)")
-                        last_capture_sync_time[drone.name] = sync_relative_time
+                        last_capture_time[drone.name] = current_time
                         
                         # 使用UDP发送数据（如果可用）
                         if udp_comms and drone.name in udp_comms and not drone.is_leader:
@@ -194,12 +182,12 @@ def main():
                         if not drone.is_leader:
                             network.send_data_to_leader(drone, img_info)
                 
-                # 定期采集点云（使用同步时间，确保所有无人机同时采集）
-                if sync_relative_time - last_pc_capture_sync_time[drone.name] >= pointcloud_capture_interval:
+                # 定期采集点云（独立于图像采集）
+                if current_time - last_pc_capture_time[drone.name] >= pointcloud_capture_interval:
                     pc_info = drone.capture_pointcloud()
                     if pc_info:
                         print(f"[采集] {drone.name} 采集点云，点数: {pc_info['point_count']} (同步时间: {sync_relative_time:.2f}s)")
-                        last_pc_capture_sync_time[drone.name] = sync_relative_time
+                        last_pc_capture_time[drone.name] = current_time
                         
                         # 使用UDP发送点云数据（如果可用）
                         if udp_comms and drone.name in udp_comms and not drone.is_leader:
@@ -253,44 +241,11 @@ def main():
     all_images_for_fusion = []
     received_data = network.get_received_data()
     
-    print(f"[系统] 头机共接收到 {len(received_data)} 条数据")
+    print(f"[系统] 头机共接收到 {len(received_data)} 张图像")
     
-    # 提取所有图像（过滤掉点云数据）
-    image_count = 0
-    pointcloud_count = 0
+    # 提取所有图像
     for item in received_data:
-        data = item['data']
-        # 检查是否是图像数据（有'image'键）还是点云数据（有'points'键）
-        if 'image' in data:
-            image_data = data['image']
-            # 如果是元数据格式（UDP传输的），需要从文件加载实际图像
-            if isinstance(image_data, dict) and 'filename' in image_data:
-                filename = image_data['filename']
-                if os.path.exists(filename):
-                    img = cv2.imread(filename)
-                    if img is not None:
-                        img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-                        # 创建新的数据字典，包含实际图像
-                        image_info = data.copy()
-                        image_info['image'] = img_rgb
-                        all_images_for_fusion.append(image_info)
-                        image_count += 1
-                    else:
-                        print(f"[警告] 无法读取图像文件: {filename}")
-                else:
-                    print(f"[警告] 图像文件不存在: {filename}")
-            elif hasattr(image_data, 'shape') or isinstance(image_data, np.ndarray):
-                # 直接是numpy数组
-                all_images_for_fusion.append(data)
-                image_count += 1
-            elif image_data is not None:
-                # 其他格式，尝试处理
-                all_images_for_fusion.append(data)
-                image_count += 1
-        elif 'points' in data or 'point_count' in data:
-            pointcloud_count += 1
-    
-    print(f"[系统] 数据统计: {image_count} 张图像, {pointcloud_count} 个点云")
+        all_images_for_fusion.append(item['data'])
     
     if len(all_images_for_fusion) > 0:
         print(f"\n[图像融合] 准备融合 {len(all_images_for_fusion)} 张图像")
